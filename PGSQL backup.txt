@@ -1,0 +1,382 @@
+CREATE OR REPLACE FUNCTION get_last_int(IN col text, IN tbl regclass, IN timestp text, OUT result integer)
+  RETURNS integer AS
+$BODY$
+BEGIN
+	EXECUTE 'SELECT ' || col || ' FROM '
+	|| tbl || ' ORDER BY ' || timestp || ' DESC LIMIT 1'
+	INTO result;
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION get_last_int(text, regclass, text)
+  OWNER TO cec_admin;
+
+CREATE OR REPLACE FUNCTION get_last_timestp(IN col text, IN tbl regclass, IN timestp text, OUT result timestamp without time zone)
+  RETURNS timestamp without time zone AS
+$BODY$BEGIN
+	EXECUTE 'SELECT ' || col || ' FROM '
+	|| tbl || ' ORDER BY ' || timestp || ' DESC LIMIT 1'
+	INTO result;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION get_last_timestp(text, regclass, text)
+  OWNER TO cec_admin;
+
+
+CREATE OR REPLACE FUNCTION get_username(IN tg_tbl_name text, OUT username text)
+  RETURNS text AS
+$BODY$BEGIN
+
+--tg_tbl_name := 'calplugmeter';
+username :=  trim(trailing 'meter' from tg_tbl_name);
+
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION get_username(text)
+  OWNER TO cec_admin;
+
+
+CREATE OR REPLACE FUNCTION init(username text, init_conspt integer, cycle_endpoint timestamp without time zone)
+  RETURNS void AS
+$BODY$DECLARE
+tbl_name text;
+tmp1 text;
+tmp2 text;
+
+BEGIN
+	tbl_name = username || 'meter';
+
+	EXECUTE 'DELETE FROM ' || tbl_name;
+	EXECUTE 'INSERT INTO ' || tbl_name || ' (timestamp, id, consumption, delta_conspt, currentpower) VALUES (localtimestamp, 0, $1, 0, 0)'
+	USING init_conspt;
+
+	tbl_name = username || '_hour';
+	tmp1 = 'hour';
+
+	EXECUTE 'DELETE FROM ' || tbl_name;
+	EXECUTE 'INSERT INTO ' || tbl_name || ' (time_hour, hourly_sum, hour_budget) VALUES (date_trunc($1,localtimestamp), 0, 0)'
+	USING tmp1;
+
+	tbl_name = username || '_daily';
+	tmp2 = 'day';
+
+	EXECUTE 'DELETE FROM ' || tbl_name;
+	EXECUTE 'INSERT INTO ' || tbl_name || ' (time_day, daily_sum, daily_budget) VALUES (date_trunc($1,localtimestamp), 0, 0)'
+	USING tmp2;
+
+	tbl_name = username || '_week';
+
+	EXECUTE 'DELETE FROM ' || tbl_name;
+	EXECUTE 'INSERT INTO ' || tbl_name || ' (week_start, weekday_sum, weekend_sum) VALUES (last_sunday(), 0, 0)';
+
+	tbl_name = username || '_cycle';
+
+	EXECUTE 'DELETE FROM ' || tbl_name;
+	EXECUTE 'INSERT INTO ' || tbl_name || ' (cycle_start, cycle_sum, cycle_budget) VALUES ($1, 0, 0)'
+	USING cycle_endpoint;
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION init(text, integer, timestamp without time zone)
+  OWNER TO cec_admin;
+
+
+CREATE OR REPLACE FUNCTION last_sunday(OUT last_sunday timestamp without time zone)
+  RETURNS timestamp without time zone AS
+$BODY$DECLARE
+	intv integer;
+	intval text;
+	tmp text;
+
+BEGIN
+	intv := to_char(localtimestamp, 'D')::integer - 1;
+	
+	last_sunday = date_trunc('day',localtimestamp) - interval '1 day' * intv;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION last_sunday()
+  OWNER TO cec_admin;
+
+CREATE OR REPLACE FUNCTION num_of_day_in_mon("dayInMon" timestamp without time zone)
+  RETURNS double precision AS
+$BODY$
+	SELECT  
+	    DATE_PART('days', 
+		DATE_TRUNC('month', "dayInMon") + '1 MONTH'::INTERVAL - DATE_TRUNC('month', "dayInMon"));
+
+$BODY$
+  LANGUAGE sql VOLATILE
+  COST 100;
+ALTER FUNCTION num_of_day_in_mon(timestamp without time zone)
+  OWNER TO cec_admin;
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION cycle_sum()
+  RETURNS trigger AS
+$BODY$DECLARE
+username text;
+tbl_name text;
+tbl_name_2 text;
+new_cycle_sum integer;
+last_cycle_start timestamp;
+tstp_trunc_day timestamp;
+delta_conspt integer;
+lim integer;
+
+BEGIN
+	username = get_username(TG_TABLE_NAME::text);
+	tbl_name = username || '_cycle';
+	tbl_name_2 = username || '_daily';
+
+	new_cycle_sum = get_last_int('cycle_sum', tbl_name::regclass, 'cycle_start') + NEW.delta_conspt;
+	last_cycle_start = get_last_timestp('cycle_start', tbl_name::regclass, 'cycle_start');
+
+	tstp_trunc_day = date_trunc('day',NEW.timestamp);
+	delta_conspt = NEW.delta_conspt;
+	lim = num_of_day_in_mon(NEW.timestamp)::integer;
+
+	IF date_trunc('day',NEW.timestamp) < get_last_timestp('cycle_start', tbl_name::regclass , 'cycle_start') + interval '30 days'
+	
+	THEN
+		EXECUTE 'UPDATE ' || tbl_name || ' SET cycle_sum = $1
+		    WHERE cycle_start = $2'
+		USING new_cycle_sum, last_cycle_start;
+		RETURN NEW;
+		
+	ELSE
+		EXECUTE 'INSERT INTO ' || tbl_name || ' (cycle_start, cycle_sum, cycle_budget) VALUES ($1, $2, 
+												(SELECT sum(daily_sum)
+												FROM (SELECT daily_sum 
+													FROM ' || tbl_name_2 ||
+													' ORDER BY time_day DESC LIMIT $3) 
+												AS last_cycle))'
+		USING tstp_trunc_day, delta_conspt, lim;
+		
+		RETURN NEW;    
+		    
+	END IF;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION cycle_sum()
+  OWNER TO cec_admin;
+
+CREATE OR REPLACE FUNCTION daily_sum()
+  RETURNS trigger AS
+$BODY$DECLARE
+username text;
+tbl_name text;
+new_daily_sum integer;
+last_time_day timestamp;
+tstp_trunc_day timestamp;
+delta_conspt integer;	
+tmp1 text;
+tmp2 text;
+tmp3 text;
+tmp4 text;
+
+
+
+BEGIN
+	username = get_username(TG_TABLE_NAME::text);
+	tbl_name = username || '_daily';
+
+	new_daily_sum = get_last_int('daily_sum', tbl_name::regclass, 'time_day') + NEW.delta_conspt;
+--new_daily_sum = get_last_int('daily_sum', tbl_name::regclass, 'time_day') +5949;
+	last_time_day = get_last_timestp('time_day', tbl_name::regclass, 'time_day');
+
+	tstp_trunc_day = date_trunc('day',NEW.timestamp);
+	delta_conspt = NEW.delta_conspt;
+	tmp1 = 'D';
+	tmp2 = '7';
+	tmp3 = 'D';
+	tmp4 = '1';
+
+
+	
+
+	IF to_char(get_last_timestp('time_day', tbl_name::regclass, 'time_day'), 'D')::Integer = to_char(NEW.timestamp, 'D')::Integer
+	THEN
+		EXECUTE 'UPDATE ' || tbl_name || ' SET daily_sum = $1
+		    WHERE time_day = $2'
+		USING new_daily_sum, last_time_day;
+		RETURN NEW;
+		
+	ELSIF to_char(get_last_timestp('time_day', tbl_name::regclass, 'time_day'), 'D') = '6' OR to_char(get_last_timestp('time_day', tbl_name::regclass, 'time_day'), 'D') = '7'
+	THEN
+		EXECUTE 'INSERT INTO ' || tbl_name || ' (time_day, daily_sum, daily_budget) VALUES ($1, $2, 
+											(SELECT avg(daily_sum) 
+											FROM (SELECT daily_sum FROM ' || tbl_name || 
+												' WHERE (to_char(time_day, $3) = $4 OR to_char(time_day, $5) = $6) 
+												ORDER BY time_day DESC LIMIT 10) 
+											AS weekends))'
+		USING tstp_trunc_day, delta_conspt, tmp1, tmp2, tmp3, tmp4;
+		
+		RETURN NEW;
+		
+	ELSE
+		EXECUTE 'INSERT INTO ' || tbl_name || ' (time_day, daily_sum, daily_budget) VALUES ($1, $2, 
+											(SELECT avg(daily_sum) 
+											FROM (SELECT daily_sum FROM ' || tbl_name ||  
+												' WHERE (to_char(time_day, $3) <> $4 AND to_char(time_day, $5) <> $6) 
+												ORDER BY time_day DESC LIMIT 25) 
+											AS weekdays))'
+		USING tstp_trunc_day, delta_conspt, tmp1, tmp2, tmp3, tmp4;
+		RETURN NEW;
+	END IF;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION daily_sum()
+  OWNER TO cec_admin;
+
+
+CREATE OR REPLACE FUNCTION gen_delta()
+  RETURNS trigger AS
+$BODY$
+BEGIN
+	
+	NEW.delta_conspt = NEW.consumption - get_last_int('consumption', TG_TABLE_NAME::regclass, '"timestamp"');
+	RETURN NEW;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION gen_delta()
+  OWNER TO cec_admin;
+
+CREATE OR REPLACE FUNCTION insert_hour()
+  RETURNS trigger AS
+$BODY$DECLARE
+username text;
+tbl_name text;
+new_hourly_sum integer;
+last_time_hour timestamp;
+tstp_trunc_hour timestamp;
+delta_conspt integer;	
+tmp1 text;
+tmp2 text;
+tmp3 text;
+tmp4 text;
+
+BEGIN
+	username = get_username(TG_TABLE_NAME::text);
+	tbl_name = username || '_hour';
+	new_hourly_sum = get_last_int('hourly_sum', tbl_name::regclass, 'time_hour') + NEW.delta_conspt;
+	last_time_hour = get_last_timestp('time_hour', tbl_name::regclass, 'time_hour');
+	
+	tstp_trunc_hour = date_trunc('hour',NEW.timestamp);
+	delta_conspt = NEW.delta_conspt;
+	tmp1 = 'HH24';
+	tmp2 = to_char(NEW.timestamp, 'HH24');
+	tmp3 = 'D';
+	tmp4 = to_char(NEW.timestamp, 'D');
+	
+	
+	IF to_char(get_last_timestp('time_hour', tbl_name::regclass, '"time_hour"'), 'HH24')::Integer = to_char(NEW.timestamp, 'HH24')::Integer
+	THEN
+		EXECUTE 'UPDATE ' || tbl_name || ' SET hourly_sum = $1 
+		    WHERE time_hour = $2'
+		USING new_hourly_sum, last_time_hour;
+		
+		RETURN NEW;
+	ELSE
+		EXECUTE 'INSERT INTO ' || tbl_name || ' (time_hour, hourly_sum, hour_budget) VALUES ($1, $2,
+											(SELECT avg(hourly_sum) 
+											FROM (SELECT hourly_sum FROM ' || tbl_name || 
+												' WHERE to_char(time_hour, $3) = $4
+													AND to_char(time_hour, $5) = $6 
+												ORDER BY time_hour DESC LIMIT 5) 
+											AS sameDnH))'
+		USING tstp_trunc_hour, delta_conspt, tmp1, tmp2, tmp3, tmp4;
+		
+		RETURN NEW;    
+		    
+	END IF;
+		
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION insert_hour()
+  OWNER TO cec_admin;
+
+
+CREATE OR REPLACE FUNCTION weekly_sum()
+  RETURNS trigger AS
+$BODY$DECLARE
+username text;
+tbl_name text;
+new_weekend_sum integer;
+new_weekday_sum integer;
+last_week_start timestamp;
+tstp_trunc_day timestamp;
+delta_conspt integer;	
+
+BEGIN
+	username = get_username(TG_TABLE_NAME::text);
+	tbl_name = username || '_week';
+
+	new_weekend_sum = get_last_int('weekend_sum', tbl_name::regclass, 'week_start') + NEW.delta_conspt;
+	last_week_start = get_last_timestp('week_start', tbl_name::regclass, 'week_start');
+
+	new_weekday_sum = get_last_int('weekday_sum', tbl_name::regclass, 'week_start') + NEW.delta_conspt;
+
+	tstp_trunc_day = date_trunc('day', NEW.timestamp);
+	delta_conspt = NEW.delta_conspt;
+	
+	IF date_trunc('day',NEW.timestamp) < get_last_timestp('week_start', tbl_name::regclass, 'week_start') + interval '7 days'
+	
+	THEN
+		IF to_char(NEW.timestamp, 'D') = '1' OR to_char(NEW.timestamp, 'D') = '7'
+
+		THEN 
+			EXECUTE 'UPDATE ' || tbl_name || ' SET weekend_sum = $1 
+			    WHERE week_start = $2'
+			USING new_weekend_sum, last_week_start;
+			RETURN NEW;
+
+		ELSE
+			EXECUTE 'UPDATE ' || tbl_name || ' SET weekday_sum = $1
+			    WHERE week_start = $2'
+			USING new_weekday_sum, last_week_start;
+			RETURN NEW;
+		END IF;
+	ELSE
+		
+		EXECUTE 'INSERT INTO ' || tbl_name || ' (week_start, weekday_sum, weekend_sum) VALUES ($1, 0, $2)'
+		USING tstp_trunc_day, delta_conspt;    
+		RETURN NEW;
+	END IF;
+END$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION weekly_sum()
+  OWNER TO cec_admin;
+
+
+
+
+
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+hostssl	all				all				127.0.0.1/32			md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+#host    replication     postgres        127.0.0.1/32            md5
+#host    replication     postgres        ::1/128                 md5
+
+host	"CEC Energy Reporting"	cec_admin	169.234.0.0/16	md5
+hostssl	"CEC Energy Reporting"	cec_admin	169.234.0.0/16	md5

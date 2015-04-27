@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setting>
+	<location>
+		<city>Irvine</city>
+		<zipcode>92617</zipcode>
+		<regioncode>6</regioncode>
+	</location>
+	<rates>
+		<tire level="0">
+			<summer>0.04476</summer>
+			<winter>0.04476</winter>
+			<lowerbound>0.0</lowerbound>
+			<upperbound>1.0</upperbound>
+		</tire>
+		<tire level="1">
+			<summer>0.07603</summer>
+			<winter>0.07603</winter>
+			<lowerbound>1.0</lowerbound>
+			<upperbound>1.3</upperbound>
+		</tire>
+		<tire level="2">
+			<summer>0.18396</summer>
+			<winter>0.18396</winter>
+			<lowerbound>1.3</lowerbound>
+			<upperbound>2.0</upperbound>
+		</tire>
+		<tire level="3">
+			<summer>0.22396</summer>
+			<winter>0.22396</winter>
+			<lowerbound>2.0</lowerbound>
+			<upperbound>-1.0</upperbound>
+		</tire>
+		<basicCharge familyType= "single">0.03</basicCharge>
+		<basicCharge familyType= "multiple">0.023</basicCharge>
+		<minimumCharge familyType = "single">0.059</minimumCharge>
+		<minimumCharge familyType= "multiple">0.044</minimumCharge>
+		<seasonRange>
+			<summerRange>
+				<start>
+					<month>6</month>
+					<day>1</day>
+				</start>
+				<end>
+					<month>10</month>
+					<day>1</day>
+				</end>
+			</summerRange>
+			<winterRange>
+				<start>
+					<month>10</month>
+					<day>1</day>
+				</start>
+				<end>
+					<month>6</month>
+					<day>1</day>
+				</end>
+			</winterRange>
+		</seasonRange>
+	</rates>
+	<allocation>
+		<baseline region = "5">
+			<baselinesummer>9.1</baselinesummer>
+			<baselinewinter>9.8</baselinewinter>		
+		</baseline>
+		<baseline region = "6">
+			<baselinesummer>9.2</baselinesummer>
+			<baselinewinter>9.6</baselinewinter>		
+		</baseline>	
+		<baseline region = "8">
+			<baselinesummer>10.2</baselinesummer>
+			<baselinewinter>9.2</baselinewinter>		
+		</baseline>	
+		<baseline region = "9">
+			<baselinesummer>13.9</baselinesummer>
+			<baselinewinter>10.5</baselinewinter>		
+		</baseline>	
+		<baseline region = "10">
+			<baselinesummer>16.0</baselinesummer>
+			<baselinewinter>10.5</baselinewinter>		
+		</baseline>	
+		<baseline region = "13">
+			<baselinesummer>18.6</baselinesummer>
+			<baselinewinter>11.0</baselinewinter>		
+		</baseline>	
+		<baseline region = "14">
+			<baselinesummer>16.1</baselinesummer>
+			<baselinewinter>10.6</baselinewinter>		
+		</baseline>	
+		<baseline region = "15">
+			<baselinesummer>43.9</baselinesummer>
+			<baselinewinter>9.0</baselinewinter>		
+		</baseline>
+		<baseline region = "16">
+			<baselinesummer>11.5</baselinesummer>
+			<baselinewinter>10.9</baselinewinter>		
+		</baseline>		
+	</allocation>
+</setting>
