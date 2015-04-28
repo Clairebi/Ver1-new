@@ -17,7 +17,8 @@ $tbl_users = "CREATE TABLE IF NOT EXISTS users (
 			  notescheck DATETIME NOT NULL,
 			  activated ENUM('0','1') NOT NULL DEFAULT '0',
               PRIMARY KEY (id),
-			  UNIQUE KEY username (username,email)
+              CONSTRAINT username UNIQUE (username,email)
+			  // UNIQUE KEY username (username,email)
              )";
 $query = mysqli_query($db_conx, $tbl_users);
 if ($query === TRUE) {
@@ -33,7 +34,8 @@ $tbl_useroptions = "CREATE TABLE IF NOT EXISTS useroptions (
 				question VARCHAR(255) NULL,
 				answer VARCHAR(255) NULL,
                 PRIMARY KEY (id),
-                UNIQUE KEY username (username) 
+                UNIQUE (username) 
+                //UNIQUE KEY username (username) 
                 )"; 
 $query = mysqli_query($db_conx, $tbl_useroptions); 
 if ($query === TRUE) {
