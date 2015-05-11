@@ -102,9 +102,9 @@
 <?php
 function GetConsumptionData(){
 	$user = 'root';  
-	$pswd = 'calplug2012';  
+	$pswd = 'root';  
 	$db = 'smart_meter_reading';  
-	$conn = mysql_connect('localhost', $user, $pswd);  
+	$conn = mysql_connect('localhost:8888', $user, $pswd);  
 	mysql_select_db($db, $conn);
 	$query = "select Consumption from smart_meter_reading.calplugmeter order by Timestamp ASC";
 	//$query = "select Consumption from smart_meter_reading.housemeter order by Timestamp ASC";
@@ -128,9 +128,9 @@ function GetConsumptionData(){
 }
 function GetDateData(){
 	$user = 'root';  
-	$pswd = 'calplug2012';  
+	$pswd = 'root';  
 	$db = 'smart_meter_reading';  
-	$conn = mysql_connect('localhost', $user, $pswd);  
+	$conn = mysql_connect('localhost:8888', $user, $pswd);  
 	mysql_select_db($db, $conn);
 	$query = "select TimeStamp from smart_meter_reading.calplugmeter order by Timestamp ASC";
 	//$query = "select TimeStamp from smart_meter_reading.housemeter order by Timestamp ASC";

@@ -35,7 +35,7 @@ $tbl_useroptions = "CREATE TABLE IF NOT EXISTS useroptions (
 				answer VARCHAR(255) NULL,
                 PRIMARY KEY (id),
                 UNIQUE (username) 
-                //UNIQUE KEY username (username) 
+                // UNIQUE KEY username (username) 
                 )"; 
 $query = mysqli_query($db_conx, $tbl_useroptions); 
 if ($query === TRUE) {
