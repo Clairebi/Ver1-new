@@ -1,11 +1,36 @@
 <?php
-session_start();
+
+echo "start"; 
+//session_start();
 /* set out document type to text/javascript instead of text/html */
-header("Content-type: text/javascript");
+// header("Content-type: text/javascript");
 
 /* our multidimentional php array to pass back to javascript via ajax */
-$con = "host=localhost:8888  dbname='smart_meter_reading' user=root password=root";
-        $db = pg_connect($con) or die('connection failed');
+//$con = "host=localhost:8888  dbname='smart_meter_reading' user=root password=root";
+//        $db = pg_connect($con) or die('connection failed');
+
+
+
+//$servername='localhost:8888'
+$user = 'root';  
+$pswd = 'root';  
+$db = 'smart_meter_reading';  
+
+$conn = mysql_connect($servername, $user, $pswd);  
+mysql_select_db($db, $conn);
+
+/*$conn = new mysqli("localhost:8888", $user, $pswd, $db); 
+if($conn->connect_error){
+    die("Connection failed: ". $conn->connect_error);
+    echo 'fail to connect.';
+} 
+else 
+{
+    echo "successful" ;
+}
+*/
+
+/*
      //   echo 'Connected to: ';
         
         $u = $_SESSION["username"];
@@ -17,8 +42,10 @@ $con = "host=localhost:8888  dbname='smart_meter_reading' user=root password=roo
 
         $u_daily = $u."_daily";
         $query = "SELECT time_day, daily_sum AS sum, daily_budget AS budget, daily_cost AS cost FROM $u_daily ORDER BY time_day DESC LIMIT 1";
-        $result1 = pg_query($query);
-        $daily_row = pg_fetch_array($result1, 0, PGSQL_ASSOC);
+        //$result1 = pg_query($query);
+        $result = mysql_query($query);
+        //$daily_row = pg_fetch_array($result1, 0, PGSQL_ASSOC);
+        $daily_row = mysql_fetch_array($result1, 0, PGSQL_ASSOC);
         
         $u_cycle = $u."_cycle";
         $query = "SELECT cycle_start, cycle_sum AS sum, cycle_budget AS budget, cycle_cost AS cost FROM $u_cycle ORDER BY cycle_start DESC LIMIT 1";
@@ -46,5 +73,5 @@ $con = "host=localhost:8888  dbname='smart_meter_reading' user=root password=roo
  $arr = array ($daily_row, $cycle_row, $week_row, $hour_row, $power_row);       
 
 echo json_encode($arr);
-
+*/
 ?>
