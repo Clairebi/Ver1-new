@@ -1,5 +1,5 @@
 <?php
-$db_conx = mysqli_connect("localhost", "change36_pguser001", "pgaogMa84#aig01g", "change36_energy00");
+$db_conx = mysqli_connect("localhost:8888", "root", "root", "change36_wop");
 // Evaluate the connection
 if (mysqli_connect_errno()) {
     echo mysqli_connect_error();

@@ -4,7 +4,7 @@ session_start();
 header("Content-type: text/javascript");
 
 /* our multidimentional php array to pass back to javascript via ajax */
-$con = "host=localhost  dbname='change36_energy00' user=change36_pguser001 password=pgaogMa84#aig01g";
+$con = "host=localhost:8888  dbname='smart_meter_reading' user=root password=root";
         $db = pg_connect($con) or die('connection failed');
      //   echo 'Connected to: ';
         
