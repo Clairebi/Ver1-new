@@ -32,7 +32,7 @@ $tbl_raw = "CREATE TABLE IF NOT EXISTS $umeter (
             delta_conspt    double precision,
             currentpower    double precision
             );";
-$result1 = pg_query($tbl_raw);
+$result1 = mysqli_query($tbl_raw);
 
 
 $u_hour = $u."_hour";
@@ -41,7 +41,7 @@ $tbl_hour = "CREATE TABLE IF NOT EXISTS $u_hour(
   time_hour timestamp without time zone,
   hourly_sum double precision,
   hour_budget double precision)";
-$result7 = pg_query($tbl_hour);
+$result7 = mysqli_query($tbl_hour);
 
 $u_daily = $u."_daily";
 
@@ -50,7 +50,7 @@ $tbl_day = "CREATE TABLE IF NOT EXISTS $u_daily(
   daily_sum double precision,
   daily_budget double precision,
   daily_cost double precision)";
-$result8 = pg_query($tbl_day);
+$result8 = mysqli_query($tbl_day);
 
 $u_week = $u."_week";
 
@@ -59,7 +59,7 @@ $tbl_week = "CREATE TABLE IF NOT EXISTS $u_week(
   weekday_sum double precision,
   weekend_sum double precision
 )";
-$result9 = pg_query($tbl_week);
+$result9 = mysqli_query($tbl_week);
 
 /*
 $u_cycle = $u."_cycle";
@@ -94,7 +94,7 @@ $tg_hour = "CREATE TRIGGER $umeter_AFTER_INSERT
             begin
               call update_hour(new._timestamp, new.id, new.consumption, new.delta_conspt, new.currentpower, new.UserID);
             end "
-$result3 = pg_query($tg_hour);
+$result3 = mysqli_query($tg_hour);
 
 /*$tg_day = "CREATE TRIGGER day_tg_$u
   AFTER INSERT OR UPDATE
@@ -109,7 +109,7 @@ $tg_day = "CREATE TRIGGER calplug_hour_AFTER_INSERT
               begin
                 call update_day(new.time_hour,new.hourly_sum, new.UserID);
               end "
-$result4 = pg_query($tg_day);
+$result4 = mysqli_query($tg_day);
     
 /* $tg_week ="CREATE TRIGGER week_tg_$u
   BEFORE INSERT OR UPDATE
@@ -123,7 +123,7 @@ $tg_week = "CREATE TRIGGER calplug_daily_AFTER_INSERT
             begin 
               call update_week(new.time_day, new.daily_sum, new.UserID);
             end "    
-$result5 = pg_query($tg_week);    
+$result5 = mysqli_query($tg_week);    
 
 /*$tg_cycle = "CREATE TRIGGER cycle_tg_$u
   AFTER INSERT OR UPDATE
