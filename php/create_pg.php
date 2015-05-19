@@ -38,7 +38,7 @@ $result1 = mysqli_query($tbl_raw);
 $u_hour = $u."_hour";
 
 $tbl_hour = "CREATE TABLE IF NOT EXISTS $u_hour(
-  time_hour timestamp without time zone,
+  time_hour timestamp,  -- without time zone, 
   hourly_sum double precision,
   hour_budget double precision)";
 $result7 = mysqli_query($tbl_hour);
@@ -46,7 +46,7 @@ $result7 = mysqli_query($tbl_hour);
 $u_daily = $u."_daily";
 
 $tbl_day = "CREATE TABLE IF NOT EXISTS $u_daily(
-  time_day timestamp without time zone,
+  time_day timestamp, -- without time zone,
   daily_sum double precision,
   daily_budget double precision,
   daily_cost double precision)";
@@ -55,7 +55,7 @@ $result8 = mysqli_query($tbl_day);
 $u_week = $u."_week";
 
 $tbl_week = "CREATE TABLE IF NOT EXISTS $u_week(
-  week_start timestamp without time zone,
+  week_start timestamp, -- without time zone,
   weekday_sum double precision,
   weekend_sum double precision
 )";
