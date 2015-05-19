@@ -13,7 +13,8 @@ if(isset($_POST["e"])){
 	// CONNECT TO THE DATABASE
 	include_once("php/db_con_pg.php");
 	// GATHER THE POSTED DATA INTO LOCAL VARIABLES AND SANITIZE
-	$e = pg_escape_string($_POST['e']);
+	
+	$e = mysql_escape_string($_POST['e']);
 	$p = md5($_POST['p']);
 	// GET USER IP ADDRESS
     $ip = preg_replace('#[^0-9.]#', '', getenv('REMOTE_ADDR'));
@@ -24,15 +25,21 @@ if(isset($_POST["e"])){
 	} else {
 	// END FORM DATA ERROR HANDLING
         //$sql = "SELECT id, username, password FROM users WHERE email='$e' AND activated='1' LIMIT 1";
-        $pgsql = "SELECT id, username, password FROM users WHERE email='$e' ";
-        $query = pg_query($pgsql);
+       
+        // $pgsql = "SELECT id, username, password FROM users WHERE email='$e' ";
+        // $query = pg_query($pgsql);
+
+        $mysql = "SELECT id, username, password FROM users WHERE email='$e' ";
+        $query = mysqli_query($mysql);
+
         var_dump($query);
-        $numrows = pg_num_rows($query); 
+        $numrows = mysqli_num_rows($query); 
         if($numrows < 1){
             echo "login_failed";
             exit();	
         }else {
-        $row = pg_fetch_array($query, 0, PGSQL_NUM);
+        //$row = pg_fetch_array($query, 0, PGSQL_NUM);
+        $row = mysqli_fetch_array($query, MYSQLI_NUM);
 		$db_id = $row[0];
 		$db_username = $row[1];
         $db_pass_str = $row[2];
@@ -48,8 +55,11 @@ if(isset($_POST["e"])){
 			setcookie("user", $db_username, strtotime( '+30 days' ), "/", "", "", TRUE);
     		setcookie("pass", $db_pass_str, strtotime( '+30 days' ), "/", "", "", TRUE); 
 			// UPDATE THEIR "IP" AND "LASTLOGIN" FIELDS
-			$pgsql = "UPDATE users SET ip='$ip', lastlogin=now() WHERE username='$db_username'";
-            $query = pg_query($pgsql); 
+			
+			// $pgsql = "UPDATE users SET ip='$ip', lastlogin=now() WHERE username='$db_username'";
+            // $query = pg_query($pgsql); 
+            $mysql = "UPDATE users SET ip='$ip', lastlogin=now() WHERE username='$db_username'";
+            $query = mysqli_query($mysql);
 			echo $db_username;
 		    exit();
 		}
