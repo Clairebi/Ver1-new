@@ -11,9 +11,11 @@ $log_password = "";//echo $user_ok; echo "!!!0";
 //User Verify function
 function evalLoggedUser($db,$id,$u,$p) {
 	//$sql = "SELECT ip FROM users WHERE id='$id' AND username='$u' AND password='$p' AND activated='1' LIMIT 1";
-    $pgsql = "SELECT ip FROM users WHERE id='$id' AND username='$u' AND password='$p' ";
-    $query = pg_query($pgsql);
-    $numrows = pg_num_rows($query); echo $numrows;
+    $mysql = "SELECT ip FROM users WHERE id='$id' AND username='$u' AND password='$p' ";
+    $query = mysqli_query($mysql);
+    $numrows = mysqli_num_rows($query); 
+
+    echo $numrows;
 	if($numrows > 0){
 		return true;
 	}
@@ -37,8 +39,8 @@ if(isset($_SESSION["userid"]) && isset($_SESSION["username"]) && isset($_SESSION
     //$user_ok = 1;
 	if($user_ok == true){
 		// Update their lastlogin datetime field
-		$pgsql = "UPDATE users SET lastlogin=now() WHERE id='$log_id'";
-        $query = pg_query($pgsql);
+		$mysql = "UPDATE users SET lastlogin=now() WHERE id='$log_id'";
+        $query = mysqli_query($mysql);
 	}
 }
 //echo $user_ok;echo "!!!";
@@ -55,10 +57,10 @@ if(isset($_GET["u"])){
 }
 // Select the member from the users table
 //$sql = "SELECT * FROM users WHERE username='$u' AND activated='1' LIMIT 1";
-$pgsql = "SELECT * FROM users WHERE username='$u'";
-$user_query = pg_query($pgsql);
+$mysql = "SELECT * FROM users WHERE username='$u'";
+$user_query = mysqli_query($mysql);
 // Now make sure that user exists in the table
-$numrows = pg_num_rows($user_query); 
+$numrows = mysqli_num_rows($user_query); 
 if($numrows < 1){
 	//echo "That user does not exist or is not yet activated, press back";
     echo "That user does not exist! press back";
