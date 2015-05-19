@@ -10,9 +10,9 @@ if(isset($_SESSION["username"])){
 if(isset($_POST["usernamecheck"])){
 	include_once("php/db_con_pg.php");
 	$username = preg_replace('#[^a-z0-9]#i', '', $_POST['usernamecheck']);
-	$pgsql = "SELECT id FROM users WHERE username='$username' LIMIT 1";
-    $query = pg_query($pgsql); 
-    $uname_check = pg_num_rows($query);
+	$mysql = "SELECT id FROM users WHERE username='$username' LIMIT 1";
+    $query = mysqli_query($mysql); 
+    $uname_check = mysqli_num_rows($query);
     if (strlen($username) < 3 || strlen($username) > 16) {
 	    echo '<strong style="color:#F00;">3 - 16 characters please</strong>';
 	    exit();
@@ -36,7 +36,7 @@ if(isset($_POST["u"])){
 	include_once("php/db_con_pg.php");
 	// GATHER THE POSTED DATA INTO LOCAL VARIABLES
 	$u = preg_replace('#[^a-z0-9]#i', '', $_POST['u']);
-	$e = pg_escape_string($_POST['e']);
+	$e = mysql_escape_string($_POST['e']);
 	$p = $_POST['p'];
 	$addr = $_POST['addr'];
     //$addr = preg_replace('#[^a-z0-9]#', '', $_POST['addr']);
@@ -50,13 +50,13 @@ if(isset($_POST["u"])){
 	// GET USER IP ADDRESS
     $ip = preg_replace('#[^0-9.]#', '', getenv('REMOTE_ADDR'));
 	// DUPLICATE DATA CHECKS FOR USERNAME AND EMAIL
-	$pgsql = "SELECT id FROM users WHERE username='$u' LIMIT 1";
-    $query = pg_query($pgsql); 
-	$u_check = pg_num_rows($query);
+	$mysql = "SELECT id FROM users WHERE username='$u' LIMIT 1";
+    $query = mysqli_query($mysql); 
+	$u_check = mysqli_num_rows($query);
 	// -------------------------------------------
-	$pgsql = "SELECT id FROM users WHERE email='$e' LIMIT 1";
-    $query = pg_query($pgsql); 
-	$e_check = pg_num_rows($query);
+	$mysql = "SELECT id FROM users WHERE email='$e' LIMIT 1";
+    $query = mysqli_query($mysql); 
+	$e_check = mysqli_num_rows($query);
 	// FORM DATA ERROR HANDLING
 	if($u == "" || $e == "" || $p == "" || $addr == "" || $city == "" || $s == "" || $c == "" || $conspt == "" || $ce == ""){
 		echo $p;echo $addr;echo $city;echo $s;echo $c;echo $conspt;echo $ce;
@@ -82,9 +82,9 @@ if(isset($_POST["u"])){
 		//include_once ("php/randStrGen.php");
 		$p_hash = md5($p);
 		// Add user info into the database table for the main site table
-		$pgsql = "INSERT INTO users (username, email, password, address1, city, state, country, init_conspt, cycle_endpoint, ip, signup, lastlogin, notescheck)       
+		$mysql = "INSERT INTO users (username, email, password, address1, city, state, country, init_conspt, cycle_endpoint, ip, signup, lastlogin, notescheck)       
 		        VALUES('$u','$e','$p_hash','$addr','$city','$s','$c','$conspt','$ce','$ip',now(),now(),now())";
-		$query = pg_query($pgsql); 
+		$query = mysqli_query($mysql); 
 		//$uid = mysqli_insert_id($db_conx);
 		// Establish their row in the useroptions table
 		//$sql = "INSERT INTO useroptions (id, username, background) VALUES ('$uid','$u','original')";
