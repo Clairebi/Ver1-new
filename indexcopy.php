@@ -1059,19 +1059,21 @@ if(isset($_GET["u"])){
     <body>
         <div id="mainFrame" class="withboarder" style="position:absolute;margin-top:0px;margin-left:0px">
 
-        <div id="InfoBlock" style="position:absolute; margin:1 auto">
-            <div id="DateDisp" style="float:left; margin:1  auto"></div>
-            <div id="Welcome" style = "float:left; margin: 1 auto"></div>
-            <div id="WeatherDisp" style="float:right; margin:1  auto">
-                <div id="WeatherLocation" style="float:right; margin:1  auto"></div>
-                <div id="WeatherIcon" style="float:right"></div>
+            <div id="InfoBlock" style="position:absolute; margin:1 auto"> "InfoBlock"
+                <div id="DateDisp" style="float:left; margin:1  auto"> "DateDisp" </div>
+                <div id="Welcome" style = "float:left; margin: 1 auto"> "Welcome" </div>
+                <div id="WeatherDisp" style="float:right; margin:1  auto">
+                    "WeatherDisp"
+                    <div id="WeatherLocation" style="float:right; margin:1  auto"> "WeatherLocation" </div>
+                    <div id="WeatherIcon" style="float:right"> "WeatherIcon" </div>
+                </div>
             </div>
-        </div>
 
-        <div id="BarDataBlock" style="position:absolute; margin:1 auto">
-            <div id="BillingCycle" ></div>
+            <div id="BarDataBlock" style="position:absolute; margin:1 auto"> "BarDataBlock"  </div>  <!-- add </div> -->
 
-            <div id="BarData1stBlock" style="float:left; margin:1  auto">
+            <div id="BillingCycle" > "BillingCycle" </div>
+
+            <div id="BarData1stBlock" style="float:left; margin:1  auto"> "BarData1stBlock"
                 <p id="titleBar1st" style = "text-align:center"></p>
                 <table id="Bar1st">
                     <tr>
@@ -1084,7 +1086,7 @@ if(isset($_GET["u"])){
                 <p style="font-size:70%;font-family:Trebuchet MS;text-align:center">Today's</br>Budget</p>
             </div>
 
-            <div id="BarData2ndBlock" style="float:right; margin:1  auto">
+            <div id="BarData2ndBlock" style="float:right; margin:1  auto"> "BarData2ndBlock"
                 <p id="titleBar2nd" style = "text-align:center"></p>
                 <table id="Bar2nd">
                     <tr>
@@ -1099,14 +1101,14 @@ if(isset($_GET["u"])){
             
         </div>
         
-        <!--
+        
 
 
         <div id="ComparisonPic" style="margin-top:60px; position:absolute; left: 300px"><img src="./img/Picture1.png" width="240"; height="240"/></div>
 
         <div id="EdisonLogo" style="position:absolute; margin:1 auto; padding-left: 140px"></div>
 
-        <div id="CurveDataBlock" style="position:absolute; margin:1 auto">
+        <div id="CurveDataBlock" style="position:absolute; margin:1 auto"> </div>  <!-- add </div> -->
 
         <div id="CurveDataTitle" style="margin-bottom:2%"><p id="CurveDataTitleText" style="font-size:80%; font-family:Trebuchet MS; text-align:center"></p></div>
 
@@ -1115,7 +1117,7 @@ if(isset($_GET["u"])){
 			<div id="BlueLegend"><div class="colorLegend" style="background-color:#ccddcc; float:left; margin-left:10%"></div><p id="blueText" style="float:left; font-size: 70%; font-family:Trebuchet MS; margin-left:5px; margin-top:-10px"></p></div>
 		</div>
 
-		<div id="CurveDataUsage" style="margin:1 auto">
+		<div id="CurveDataUsage" style="margin:1 auto"> "CurveDataUsage"
 
 			<div id = "divYaxis" style="float:left">
 				<table id="yaxis">
@@ -1274,7 +1276,7 @@ if(isset($_GET["u"])){
 						<td><p class="hoursTag", style="color:#FFFFF">0</p></td>
 					</tr>
 				</table>
-			</div> -->
+			</div> 
 		</div>
 
 		<div id="CurveDataUsageHourly" style="margin:1 auto">
@@ -1300,7 +1302,7 @@ if(isset($_GET["u"])){
 					</tr>
 				</table>
 			</div>
-<!--
+
 			<div id="hour4" class="hourBlock">
 				<div class="barBlock">
 					<table id="AverageHour4Table" class="hourTable">
@@ -1452,7 +1454,7 @@ if(isset($_GET["u"])){
 	    </div>
 
 
-        <div id="RightBlock" style="position:absolute; margin:1 auto">
+        <div id="RightBlock" style="position:absolute; margin:1 auto"> "RightBlock"
 
             <div id="CurrentPower" style="margin:1 auto"></div>
             <div id="BarDataTitle" style="margin: 1 auto"></div>
@@ -1509,8 +1511,6 @@ if(isset($_GET["u"])){
 
 	    <div  id="ContactAndWarning"style = "position:absolute; border-radius:25px"></div>
         </div>
-
-    -->
                
     </body>
 </html>
