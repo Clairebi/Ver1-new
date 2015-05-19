@@ -1099,6 +1099,9 @@ if(isset($_GET["u"])){
             
         </div>
         
+        <!--
+
+
         <div id="ComparisonPic" style="margin-top:60px; position:absolute; left: 300px"><img src="./img/Picture1.png" width="240"; height="240"/></div>
 
         <div id="EdisonLogo" style="position:absolute; margin:1 auto; padding-left: 140px"></div>
@@ -1271,7 +1274,7 @@ if(isset($_GET["u"])){
 						<td><p class="hoursTag", style="color:#FFFFF">0</p></td>
 					</tr>
 				</table>
-			</div>
+			</div> -->
 		</div>
 
 		<div id="CurveDataUsageHourly" style="margin:1 auto">
@@ -1297,7 +1300,7 @@ if(isset($_GET["u"])){
 					</tr>
 				</table>
 			</div>
-
+<!--
 			<div id="hour4" class="hourBlock">
 				<div class="barBlock">
 					<table id="AverageHour4Table" class="hourTable">
@@ -1506,6 +1509,8 @@ if(isset($_GET["u"])){
 
 	    <div  id="ContactAndWarning"style = "position:absolute; border-radius:25px"></div>
         </div>
+
+    -->
                
     </body>
 </html>
