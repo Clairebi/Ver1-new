@@ -18,6 +18,8 @@ if(isset($_POST["e"])){
 	$p = md5($_POST['p']);
 	// GET USER IP ADDRESS
     $ip = preg_replace('#[^0-9.]#', '', getenv('REMOTE_ADDR'));
+    // echo "select result of ip ". $ip; 
+    
 	// FORM DATA ERROR HANDLING
 	if($e == "" || $p == ""){
 		echo "login_failed";
